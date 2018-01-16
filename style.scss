@@ -1,0 +1,123 @@
+// khai bao gia tri tuong ung voi cac bien
+$width_default: 30px;
+$columns_default: 12 !default;
+$xs_screen_max: 768px !default;
+$sm_screen_min: 768px !default;
+$lg_screen_min: 1200px !default;
+$font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+$font-size: 14px !default;
+$line-height: 20px !default;
+$text-color: #333;
+$padding-hoz: 10px;
+$color: rgba(86,61,124,.2);
+
+// khoi tao mixin create-row
+// tham so truyen vao $width_default = 30px
+// $set_width ke thua gia tri tu tham so $width_default truyen vao
+@mixin create-row($set_width: $width_default) {
+  margin-left:  ceil(($set_width / -2));
+  margin-right: floor(($set_width / -2));
+}
+
+// khoi tao mixin calc-grid-column tinh toan do rong cua cac class
+// tham so truyen vao $index = gia tri tu 1 -> 12
+// tham so truyen vao $class = xs/sm/lg
+// tham so truyen vao $type = width
+@mixin calc-grid-column($index, $class, $type) {
+  @if ($type == width) and ($index > 0) {
+    .col-#{$class}-#{$index} {
+      width: percentage(($index / $columns_default));
+    }
+  }
+}
+
+// khoi tao mixin create-columns css chung cho tat ca cac class
+// tham so truyen vao $columns_default = 12
+@mixin create-columns($i: 1, $list: ".col-xs-#{$i}, .col-sm-#{$i}, .col-lg-#{$i}") {
+  @for $i from (1 + 1) through $columns_default {
+    $list: "#{$list}, .col-xs-#{$i}, .col-sm-#{$i}, .col-lg-#{$i}";
+  }
+  #{$list} {
+    position: relative;
+    // Prevent columns from collapsing when empty
+    min-height: 1px;
+    // Inner gutter via padding
+    padding-left:  ceil(($width_default / 2));
+    padding-right: floor(($width_default / 2));
+  }
+}
+
+// khoi tao mixin float-grid-columns them thuoc tinh float: left cho cac class duoc goi
+// tham so truyen vao $columns_default = 12
+// tham so truyen vao $class = xs/sm/lg
+
+@mixin float-grid-columns($class, $i: 1, $list: ".col-#{$class}-#{$i}") {
+  @for $i from (1 + 1) through $columns_default {
+    $list: "#{$list}, .col-#{$class}-#{$i}";
+  }
+  #{$list} {
+    float: left;
+  }
+}
+@mixin box-sizing($boxmodel) {
+  -webkit-box-sizing: $boxmodel;
+  -moz-box-sizing: $boxmodel;
+  box-sizing: $boxmodel;
+}
+body {
+  font-family: $font-family;
+  font-size: $font-size;
+  line-height: $line-height;
+  color: $text-color;
+}
+
+* {
+  @include box-sizing(border-box);
+}
+
+[class^=col-] {
+  padding-top: $padding-hoz;
+  padding-bottom: $padding-hoz;
+  background-color: $color;
+  border: 1px solid $color;
+}
+// goi mixin create-row
+.row {
+  @include create-row;
+}
+// goi mixin create-columns
+@include create-columns;
+
+// khoi tao mixin loop-grid-columns tinh do rong cho cac class
+// $columns = 12
+// $class = xs/sm/lg
+// $type = width
+@mixin loop-grid-columns($columns, $class, $type) {
+  @for $i from 0 through $columns {
+    @include calc-grid-column($i, $class, $type);
+  }
+}
+
+// khoi tao mixin make-grid goi 2 mixin o tren la float-grid-columns va loop-grid-columns
+// $columns_default = 12
+// $class = xs/sm/lg
+// $type = width
+@mixin make-grid($class) {
+  @include float-grid-columns($class);
+  @include loop-grid-columns($columns_default, $class, width);
+}
+// goi mixin make-grid cho class xs
+// set max-width = $xs_screen_max = 768px
+@media (max-width: $xs_screen_max) {
+  @include make-grid(xs);
+}
+// goi mixin make-grid cho class sm
+// set min-width = $sm_screen_min = 768px
+@media (min-width: $sm_screen_min) {
+  @include make-grid(sm);
+}
+// goi mixin make-grid cho class lg
+// set min-width = $lg_screen_min = 1200px
+@media (min-width: $lg_screen_min) {
+  @include make-grid(lg);
+}
